@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Logo } from '@/components/ui/Logo';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { Text } from '@/components/ui/text';
 import { Divider } from '@/components/ui/Divider';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -16,27 +17,22 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
 
   const validateForm = (): boolean => {
-    let hasError = false;
-    const newErrors = { email: '', password: '' };
-
     if (!email) {
-      newErrors.email = 'E-mail é obrigatório';
-      hasError = true;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'E-mail inválido';
-      hasError = true;
+      Alert.alert('Erro', 'E-mail é obrigatório');
+      return false;
     }
-
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      Alert.alert('Erro', 'E-mail inválido');
+      return false;
+    }
     if (!password) {
-      newErrors.password = 'Senha é obrigatória';
-      hasError = true;
+      Alert.alert('Erro', 'Senha é obrigatória');
+      return false;
     }
-
-    setErrors(newErrors);
-    return !hasError;
+    return true;
   };
 
   const handleLogin = async () => {
@@ -48,7 +44,7 @@ export default function LoginScreen() {
     } catch (error: any) {
       Alert.alert(
         'Erro no login',
-        error.response?.data?.message || 'Não foi possível fazer login. Verifique suas credenciais.'
+        error.response?.data?.message || 'Não foi possível fazer login.'
       );
     } finally {
       setLoading(false);
@@ -70,77 +66,108 @@ export default function LoginScreen() {
         className="flex-1"
       >
         <ScrollView 
-          contentContainerClassName="flex-grow justify-center"
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
           <View className="px-6 py-8">
             {/* Logo */}
-            <View className="items-center mb-8 mt-4">
+            <View className="items-center mb-8">
               <Logo variant="long" color="primary" size={240} />
             </View>
 
             {/* Formulário */}
-            <View className="w-full">
-              <Input
-                label="Usuário:"
-                value={email}
-                onChangeText={(text) => {
-                  setEmail(text);
-                  setErrors({ ...errors, email: '' });
-                }}
-                placeholder="Digite seu e-mail"
-                keyboardType="email-address"
-                error={errors.email}
-              />
+            <View className="w-full gap-4">
+              {/* Email Input */}
+              <View className="gap-2">
+                <Text className="text-primary font-bold text-sm">Usuário:</Text>
+                <Input
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="Digite seu e-mail"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  editable={!loading}
+                  className="bg-white border-2 border-primary"
+                />
+              </View>
 
-              <Input
-                label="Senha:"
-                value={password}
-                onChangeText={(text) => {
-                  setPassword(text);
-                  setErrors({ ...errors, password: '' });
-                }}
-                placeholder="Digite sua senha"
-                secureTextEntry
-                error={errors.password}
-              />
+              {/* Password Input */}
+              <View className="gap-2">
+                <Text className="text-primary font-bold text-sm">Senha:</Text>
+                <View className="relative">
+                  <Input
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholder="Digite sua senha"
+                    secureTextEntry={!showPassword}
+                    editable={!loading}
+                    className="bg-white border-2 border-primary pr-12"
+                  />
+                  <TouchableOpacity
+                    onPress={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-0 h-full justify-center"
+                  >
+                    <Ionicons
+                      name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                      size={24}
+                      color="#1238b4"
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
 
+              {/* Forgot Password */}
               <TouchableOpacity 
                 onPress={() => router.push('/forgot-password')}
-                className="self-end mb-6"
+                className="self-end"
+                disabled={loading}
               >
-                <Text className="text-primary font-urbanist text-small">
+                <Text className="text-primary text-sm">
                   Esqueceu a senha?
                 </Text>
               </TouchableOpacity>
 
+              {/* Login Button */}
               <Button
-                title="Login"
                 onPress={handleLogin}
-                variant="primary"
-                loading={loading}
-              />
+                disabled={loading}
+                className="bg-primary h-12 mt-2"
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff5dc" />
+                ) : (
+                  <Text className="text-secondary font-semibold">Login</Text>
+                )}
+              </Button>
             </View>
 
             {/* Divider */}
             <Divider />
 
-            {/* Login com Google */}
+            {/* Google Login */}
             <Button
-              title="Entrar com Google"
               onPress={handleGoogleLogin}
-              variant="google"
-              icon={<Ionicons name="logo-google" size={32} color="#1238b4" />}
-            />
+              variant="outline"
+              disabled={loading}
+              className="border-2 border-primary bg-transparent h-12"
+            >
+              <View className="flex-row items-center gap-2">
+                <Ionicons name="logo-google" size={24} color="#1238b4" />
+                <Text className="text-primary font-semibold">Entrar com Google</Text>
+              </View>
+            </Button>
 
-            {/* Link para cadastro */}
+            {/* Register Link */}
             <View className="flex-row items-center justify-center mt-6">
-              <Text className="text-primary font-urbanist text-small">
+              <Text className="text-primary text-sm">
                 Ainda não tem uma conta?{' '}
               </Text>
-              <TouchableOpacity onPress={() => router.push('/register')}>
-                <Text className="text-primary font-urbanist font-bold text-small">
+              <TouchableOpacity 
+                onPress={() => router.push('/register')}
+                disabled={loading}
+              >
+                <Text className="text-primary font-bold text-sm">
                   Cadastrar
                 </Text>
               </TouchableOpacity>

@@ -1,11 +1,11 @@
-import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { View, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import { useRouter } from 'expo-router';
 import { Logo } from '@/components/ui/Logo';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { Text } from '@/components/ui/text';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function ForgotPasswordScreen() {
@@ -14,27 +14,23 @@ export default function ForgotPasswordScreen() {
   
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [emailSent, setEmailSent] = useState(false);
 
   const validateEmail = (email: string): boolean => {
     if (!email) {
-      setError('E-mail é obrigatório');
+      Alert.alert('Erro', 'E-mail é obrigatório');
       return false;
     }
-    
     if (!/\S+@\S+\.\S+/.test(email)) {
-      setError('E-mail inválido');
+      Alert.alert('Erro', 'E-mail inválido');
       return false;
     }
-
     return true;
   };
 
   const handleResetPassword = async () => {
     if (!validateEmail(email)) return;
 
-    setError('');
     setLoading(true);
     
     try {
@@ -53,7 +49,7 @@ export default function ForgotPasswordScreen() {
     } catch (error: any) {
       Alert.alert(
         'Erro',
-        error.response?.data?.message || 'Não foi possível enviar o e-mail. Tente novamente.'
+        error.response?.data?.message || 'Não foi possível enviar o e-mail.'
       );
     } finally {
       setLoading(false);
@@ -67,22 +63,22 @@ export default function ForgotPasswordScreen() {
         className="flex-1"
       >
         <ScrollView 
-          contentContainerClassName="flex-grow justify-center"
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
           <View className="px-6 py-8">
             {/* Logo */}
-            <View className="items-center mb-8 mt-4">
-              <Logo size={240} />
+            <View className="items-center mb-8">
+              <Logo variant="long" color="primary" size={240} />
             </View>
 
             {/* Título */}
             <View className="mb-6">
-              <Text className="text-primary font-urbanist font-bold text-h2 mb-2">
+              <Text className="text-primary font-bold text-3xl mb-2">
                 Esqueceu sua senha?
               </Text>
-              <Text className="text-primary font-urbanist text-body">
+              <Text className="text-primary text-base">
                 {emailSent 
                   ? 'E-mail enviado! Verifique sua caixa de entrada.'
                   : 'Informe seu email abaixo para redefinir senha.'
@@ -90,68 +86,75 @@ export default function ForgotPasswordScreen() {
               </Text>
             </View>
 
-            {!emailSent && (
+            {!emailSent ? (
               <>
                 {/* Formulário */}
-                <View className="w-full mb-8">
-                  <Input
-                    label="Email"
-                    value={email}
-                    onChangeText={(text) => {
-                      setEmail(text);
-                      setError('');
-                    }}
-                    placeholder="Digite seu e-mail"
-                    keyboardType="email-address"
-                    error={error}
-                  />
+                <View className="w-full gap-4 mb-8">
+                  <View className="gap-2">
+                    <Text className="text-primary font-bold text-sm">Email</Text>
+                    <Input
+                      value={email}
+                      onChangeText={setEmail}
+                      placeholder="Digite seu e-mail"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      editable={!loading}
+                      className="bg-white border-2 border-primary"
+                    />
+                  </View>
 
                   <Button
-                    title="Redefinir senha"
                     onPress={handleResetPassword}
-                    variant="primary"
-                    loading={loading}
-                  />
+                    disabled={loading}
+                    className="bg-primary h-12 mt-2"
+                  >
+                    {loading ? (
+                      <ActivityIndicator color="#fff5dc" />
+                    ) : (
+                      <Text className="text-secondary font-semibold">Redefinir senha</Text>
+                    )}
+                  </Button>
                 </View>
               </>
-            )}
-
-            {emailSent && (
-              <View className="mb-8">
-                <View className="bg-green-50 border border-green-200 rounded-button p-4 mb-6">
-                  <Text className="text-green-800 font-urbanist text-body text-center">
+            ) : (
+              <View className="mb-8 gap-4">
+                {/* Success Message */}
+                <View className="bg-cyan/20 border-2 border-cyan rounded-lg p-4">
+                  <Text className="text-primary text-base text-center">
                     ✉️ E-mail enviado com sucesso!
                   </Text>
                 </View>
 
                 <Button
-                  title="Voltar para Login"
                   onPress={() => router.push('/login')}
-                  variant="primary"
-                />
+                  className="bg-primary h-12"
+                >
+                  <Text className="text-secondary font-semibold">Voltar para Login</Text>
+                </Button>
+
+                {/* Info Box */}
+                <View className="mt-4 p-4 bg-white border-2 border-primary border-dashed rounded-lg">
+                  <Text className="text-primary text-sm text-center">
+                    💡 Você receberá um link para criar uma nova senha
+                  </Text>
+                </View>
               </View>
             )}
 
             {/* Link para login */}
             <View className="flex-row items-center justify-center">
-              <Text className="text-primary font-urbanist text-small">
+              <Text className="text-primary text-sm">
                 Lembrei da minha senha!{' '}
               </Text>
-              <TouchableOpacity onPress={() => router.push('/login')}>
-                <Text className="text-primary font-urbanist font-bold text-small">
+              <TouchableOpacity 
+                onPress={() => router.push('/login')}
+                disabled={loading}
+              >
+                <Text className="text-primary font-bold text-sm">
                   Login
                 </Text>
               </TouchableOpacity>
             </View>
-
-            {/* Informações adicionais */}
-            {emailSent && (
-              <View className="mt-8 p-4 bg-white border-2 border-primary border-dotted rounded-button">
-                <Text className="text-blue-800 font-urbanist text-tiny text-center">
-                  💡 Você receberá um link para criar uma nova senha
-                </Text>
-              </View>
-            )}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
