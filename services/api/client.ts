@@ -1,5 +1,6 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 
 const API_BASE_URL = 'localhost:6000';
 
@@ -30,7 +31,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       await AsyncStorage.removeItem('@navtour:token');
       await AsyncStorage.removeItem('@navtour:user');
-      // Redirecionar para login seria feito aqui
+      router.replace('/login'); 
     }
     return Promise.reject(error);
   }
