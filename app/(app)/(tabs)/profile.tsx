@@ -1,8 +1,11 @@
 import { View, Text, ScrollView, TouchableOpacity, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
+  const router = useRouter();
+  
   const stats = [
     { icon: 'location', value: '47', label: 'Destinos', color: '#ff6a32' },
     { icon: 'star', value: '892', label: 'Pontos', color: '#1238b4' },
@@ -10,11 +13,15 @@ export default function ProfileScreen() {
   ];
 
   const menuItems = [
-    { icon: 'person-outline', label: 'Dados Pessoais', color: '#1238b4' },
+    { icon: 'person-outline', label: 'Dados Pessoais', color: '#1238b4', route: '/personal-data' },
     { icon: 'heart-outline', label: 'Preferências de Viagem', color: '#ff6a32' },
-    { icon: 'lock-closed-outline', label: 'Privacidade & Segurança', color: '#1238b4',badge:1 },
+    { icon: 'lock-closed-outline', label: 'Privacidade & Segurança', color: '#1238b4', badge: 1, route: '/privacy-security' },
     { icon: 'help-circle-outline', label: 'Ajuda & Suporte', color: '#ff6a32' },
   ];
+
+  const handleLogout = () => {
+    router.replace('/login');
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-secondary">
@@ -23,7 +30,10 @@ export default function ProfileScreen() {
         <View className="px-6 pt-4 pb-6">
           <View className="flex-row items-center justify-between mb-6">
             <Text className="text-h1 text-primary font-bold">Perfil</Text>
-            <TouchableOpacity className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm">
+            <TouchableOpacity 
+              onPress={() => router.push('/settings')}
+              className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm"
+            >
               <Ionicons name="settings-outline" size={22} color="#1238b4" />
             </TouchableOpacity>
           </View>
@@ -63,6 +73,7 @@ export default function ProfileScreen() {
             {menuItems.map((item, idx) => (
               <Pressable 
                 key={idx} 
+                onPress={() => item.route && router.push(item.route as any)}
                 className={`flex-row items-center p-4 active:bg-primary/5 ${idx !== menuItems.length - 1 ? 'border-b border-primary/5' : ''}`}
               >
                 <View className="w-10 h-10 rounded-full items-center justify-center mr-3" style={{ backgroundColor: item.color + '15' }}>
@@ -82,7 +93,10 @@ export default function ProfileScreen() {
 
         {/* Logout */}
         <View className="px-6 pb-8">
-          <TouchableOpacity className="bg-white border-2 border-orange rounded-card p-4 flex-row items-center justify-center gap-2 shadow-sm active:bg-red-50">
+          <TouchableOpacity 
+            onPress={handleLogout}
+            className="bg-white border-2 border-orange rounded-card p-4 flex-row items-center justify-center gap-2 shadow-sm active:bg-red-50"
+          >
             <Ionicons name="log-out-outline" size={24} color="#EF4444" />
             <Text className="text-orange font-bold text-body">Sair da Conta</Text>
           </TouchableOpacity>
