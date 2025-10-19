@@ -1,15 +1,12 @@
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Dimensions, Modal } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { useState, useRef } from 'react';
+import { InteractiveMap, MapLocation } from '@/components/interativeMap';
+import { Logo } from '@/components/ui/Logo';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export default function HomeScreen() {
-  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
-  const mapRef = useRef<MapView>(null);
-
   const recentlyViewed = [
     { id: 1, name: 'Praia do Futuro', image: '🏖️', rating: 4.8 },
     { id: 2, name: 'Dragão do Mar', image: '🎭', rating: 4.9 },
@@ -21,142 +18,24 @@ export default function HomeScreen() {
     { id: 2, name: 'Mercado Central', category: 'Gastronomia', image: '🍽️' },
   ];
 
-  const nearby = [
+  const nearby: MapLocation[] = [
     { id: 1, name: 'Café Colonial', distance: '0.8 km', image: '☕', latitude: -3.7319, longitude: -38.5267 },
     { id: 2, name: 'Museu da Imagem', distance: '1.2 km', image: '🖼️', latitude: -3.7289, longitude: -38.5197 },
     { id: 3, name: 'Parque Ibirapuera', distance: '2.5 km', image: '🌳', latitude: -3.7419, longitude: -38.5367 },
   ];
 
-  const handleZoomIn = () => {
-    mapRef.current?.getCamera().then((cam) => {
-      if (cam.zoom !== undefined) {
-        mapRef.current?.animateCamera({
-          center: cam.center,
-          zoom: cam.zoom + 1,
-        });
-      }
-    });
+  const handleMarkerPress = (location: MapLocation) => {
+    console.log('Marker pressed:', location.name);
   };
-
-  const handleZoomOut = () => {
-    mapRef.current?.getCamera().then((cam) => {
-      if (cam.zoom !== undefined) {
-        mapRef.current?.animateCamera({
-          center: cam.center,
-          zoom: cam.zoom - 1,
-        });
-      }
-    });
-  };
-
-  const renderMap = (fullscreen = false) => (
-    <View style={{ height: fullscreen ? '100%' : 200 }} className="relative">
-      <MapView
-        ref={mapRef}
-        provider={PROVIDER_GOOGLE}
-        style={{ flex: 1 }}
-        initialRegion={{
-          latitude: -3.7319,
-          longitude: -38.5267,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        }}
-        showsUserLocation
-        showsMyLocationButton={false}
-        zoomEnabled
-        zoomControlEnabled={false}
-        scrollEnabled
-        pitchEnabled
-        rotateEnabled
-      >
-        {nearby.map((place) => (
-          <Marker
-            key={place.id}
-            coordinate={{
-              latitude: place.latitude,
-              longitude: place.longitude,
-            }}
-            title={place.name}
-            description={place.distance}
-          >
-            <View className="bg-primary w-10 h-10 rounded-full items-center justify-center shadow-md border-2 border-white">
-              <Text className="text-xl">{place.image}</Text>
-            </View>
-          </Marker>
-        ))}
-      </MapView>
-
-      {/* Map Controls */}
-      <View className="absolute right-3 top-3 gap-2">
-        {fullscreen && (
-          <TouchableOpacity 
-            onPress={() => setIsMapFullscreen(false)}
-            className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-md"
-          >
-            <Ionicons name="close" size={24} color="#1238b4" />
-          </TouchableOpacity>
-        )}
-        
-        {!fullscreen && (
-          <TouchableOpacity 
-            onPress={() => setIsMapFullscreen(true)}
-            className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-md"
-          >
-            <Ionicons name="expand" size={20} color="#1238b4" />
-          </TouchableOpacity>
-        )}
-        
-        <TouchableOpacity 
-          onPress={handleZoomIn}
-          className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-md"
-        >
-          <Ionicons name="add" size={24} color="#1238b4" />
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          onPress={handleZoomOut}
-          className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-md"
-        >
-          <Ionicons name="remove" size={24} color="#1238b4" />
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          onPress={() => {
-            mapRef.current?.animateToRegion({
-              latitude: -3.7319,
-              longitude: -38.5267,
-              latitudeDelta: 0.05,
-              longitudeDelta: 0.05,
-            });
-          }}
-          className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-md"
-        >
-          <Ionicons name="locate" size={20} color="#1238b4" />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
 
   return (
     <SafeAreaView className="flex-1 bg-secondary">
-      {/* Fullscreen Map Modal */}
-      <Modal
-        visible={isMapFullscreen}
-        animationType="slide"
-        statusBarTranslucent
-      >
-        <SafeAreaView className="flex-1 bg-secondary">
-          {renderMap(true)}
-        </SafeAreaView>
-      </Modal>
-
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View className="px-6 pt-4 pb-6">
           <View className="flex-row items-center justify-between mb-6">
             <View>
-              <Text className="text-small text-primary/60">Olá,</Text>
-              <Text className="text-h2 text-primary font-bold">João Silva</Text>
+              <Logo variant='long' size={120}/>
             </View>
             <TouchableOpacity className="w-12 h-12 rounded-full bg-white items-center justify-center shadow-sm">
               <Ionicons name="notifications-outline" size={24} color="#1238b4" />
@@ -274,7 +153,11 @@ export default function HomeScreen() {
 
           {/* Map */}
           <View className="bg-white rounded-card shadow-card overflow-hidden mb-4">
-            {renderMap(false)}
+            <InteractiveMap
+              locations={nearby}
+              height={200}
+              onMarkerPress={handleMarkerPress}
+            />
           </View>
 
           {/* List */}
