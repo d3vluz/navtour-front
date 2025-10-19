@@ -6,6 +6,7 @@ export default function AppLayout() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="personal-data" />
       <Stack.Screen name="privacy-security" />
+      <Stack.Screen name="settings" />
     </Stack>
   );
 }
