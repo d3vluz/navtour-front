@@ -16,7 +16,7 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = () => {
-    router.replace('/home');
+    router.replace('/onboarding');
   }
 
   return (
@@ -32,16 +32,7 @@ export default function LoginScreen() {
         >
           <View className="px-6 py-8">
             <View className="items-center mb-6">
-              <Logo variant="short" color="primary" size={100} />
-            </View>
-
-            <View className="mb-6">
-              <Text className="text-primary font-bold text-3xl mb-2">
-                Bem-vindo(a)!
-              </Text>
-              <Text className="text-primary text-base">
-                Entre com sua conta para continuar
-              </Text>
+              <Logo variant="long" color="primary" size={260} />
             </View>
 
             <View className="w-full gap-4">

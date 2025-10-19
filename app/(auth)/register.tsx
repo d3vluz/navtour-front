@@ -31,7 +31,7 @@ export default function RegisterScreen() {
         >
           <View className="px-6 py-8">
             <View className="items-center mb-6">
-              <Logo variant="short" color="primary" size={100} />
+              <Logo variant="long" color="primary" size={260} />
             </View>
 
             <View className="mb-6">
